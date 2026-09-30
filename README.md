@@ -4,7 +4,7 @@ A lightweight, root-only Android app that makes **bypass charging possible outsi
 
 ![Platform](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white)
 ![Root](https://img.shields.io/badge/requires-root-red)
-![Device](https://img.shields.io/badge/device-Galaxy%20S23%2B-1428A0)
+![Device](https://img.shields.io/badge/device-Samsung-1428A0)
 ![UI](https://img.shields.io/badge/UI-Material%203-6750A4)
 
 ## Overview
