@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
 import kotlin.concurrent.thread
@@ -22,7 +23,12 @@ class MainActivity : AppCompatActivity() {
     private var updatingUi = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        DynamicColors.applyToActivityIfAvailable(this) // Material You colors
+        DynamicColors.applyToActivityIfAvailable(
+            this,
+            DynamicColorsOptions.Builder()
+                .setThemeOverlay(R.style.ThemeOverlay_BypassCharging_PureBlack)
+                .build()
+        ) // Material You colors + pure black in dark mode
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
