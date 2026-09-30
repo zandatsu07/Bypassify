@@ -1,6 +1,6 @@
 # ⚡ Bypass Charging
 
-A lightweight, root-only Android app that lets you turn **bypass charging** on and off on **Samsung devices that support bypass charging while gaming** (tested on the **Galaxy S23+**), without having to launch a game.
+A lightweight, root-only Android app that makes **bypass charging possible outside of gaming mode** on Samsung devices that support bypass charging, when used with a **PPS-supported charger**.
 
 ![Platform](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white)
 ![Root](https://img.shields.io/badge/requires-root-red)
@@ -9,7 +9,9 @@ A lightweight, root-only Android app that lets you turn **bypass charging** on a
 
 ## Overview
 
-By default, Samsung only enables bypass charging while a game is running. This app removes that limitation: it toggles bypass charging directly, so you can use it **anytime, in any app or while idle**. Power is supplied straight to the phone instead of going through the battery, which reduces heat and battery wear during long charging sessions.
+By default, Samsung only enables bypass charging while a game is running. This app removes that limitation: on Samsung devices that support bypass charging, it lets you turn bypass charging on and off **anytime, in any app or while idle, outside of gaming mode**, as long as you use a **PPS-supported charger**.
+
+With bypass charging active, power is supplied straight to the phone instead of going through the battery, which reduces heat and battery wear during long charging sessions. Developed and tested on the Galaxy S23+.
 
 ## Features
 
