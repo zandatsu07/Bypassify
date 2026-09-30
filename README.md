@@ -1,4 +1,4 @@
-# ⚡ Bypass Charging
+# ⚡ Bypassify
 
 A lightweight, root-only Android app that makes **bypass charging possible outside of gaming mode** on Samsung devices that support bypass charging, when used with a **PPS-supported charger**.
 
