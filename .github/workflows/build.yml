@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    tags: ['v*']          # e.g. git tag v1.0 && git push origin v1.0  -> builds + publishes a Release
+    tags: ['v*']          # e.g. tag v1.0 -> builds + publishes a Release
   workflow_dispatch:      # manual run from the Actions tab (uploads APK as an artifact only)
 
 permissions:
@@ -19,7 +19,9 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
+      # The Android SDK is preinstalled on ubuntu-latest; just make sure licenses are accepted.
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - uses: gradle/actions/setup-gradle@v4
         with:
