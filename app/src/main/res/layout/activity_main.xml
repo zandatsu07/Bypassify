@@ -66,6 +66,31 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/modeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnModeRoot"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Root" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnModeShizuku"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Shizuku" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.Material3.CardView.Outlined"
                 android:layout_width="match_parent"

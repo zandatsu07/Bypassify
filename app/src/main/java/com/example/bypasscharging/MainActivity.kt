@@ -1,15 +1,18 @@
 package com.example.bypasscharging
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
+import rikka.shizuku.Shizuku
 import kotlin.concurrent.thread
 import com.google.android.material.R as M3
 
@@ -21,6 +24,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var subtitle: TextView
     private lateinit var toggle: MaterialSwitch
     private var updatingUi = false
+
+    private val shizukuResult = Shizuku.OnRequestPermissionResultListener { _, grant ->
+        if (grant == PackageManager.PERMISSION_GRANTED) refresh()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         DynamicColors.applyToActivityIfAvailable(
@@ -42,6 +49,32 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnOn).setOnClickListener { apply(true) }
         findViewById<MaterialButton>(R.id.btnOff).setOnClickListener { apply(false) }
         findViewById<MaterialButton>(R.id.btnRefresh).setOnClickListener { refresh() }
+
+        // Root / Shizuku selector
+        val group = findViewById<MaterialButtonToggleGroup>(R.id.modeGroup)
+        group.check(
+            if (BypassController.getMode(this) == BypassController.Mode.SHIZUKU) R.id.btnModeShizuku
+            else R.id.btnModeRoot
+        )
+        group.addOnButtonCheckedListener { _, id, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            if (id == R.id.btnModeShizuku) {
+                BypassController.setMode(this, BypassController.Mode.SHIZUKU)
+                if (BypassController.shizukuRunning() && !BypassController.shizukuGranted()) {
+                    try { Shizuku.requestPermission(1001) } catch (_: Throwable) {}
+                }
+            } else {
+                BypassController.setMode(this, BypassController.Mode.ROOT)
+            }
+            refresh()
+        }
+
+        try { Shizuku.addRequestPermissionResultListener(shizukuResult) } catch (_: Throwable) {}
+    }
+
+    override fun onDestroy() {
+        try { Shizuku.removeRequestPermissionResultListener(shizukuResult) } catch (_: Throwable) {}
+        super.onDestroy()
     }
 
     override fun onResume() {
@@ -50,12 +83,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun apply(enabled: Boolean) = thread {
-        val s = BypassController.write(enabled)
+        val s = BypassController.write(this, enabled)
         runOnUiThread { render(s) }
     }
 
     private fun refresh() = thread {
-        val s = BypassController.read()
+        val s = BypassController.read(this)
         runOnUiThread { render(s) }
     }
 

@@ -13,7 +13,7 @@ class BypassTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         thread {
-            val s = BypassController.read()
+            val s = BypassController.read(this)
             main.post { render(s) }
         }
     }
@@ -24,7 +24,7 @@ class BypassTileService : TileService() {
         val target = qsTile?.state != Tile.STATE_ACTIVE
         qsTile?.apply { state = if (target) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE; updateTile() }
         thread {
-            val s = BypassController.write(target)
+            val s = BypassController.write(this, target)
             main.post { render(s) }
         }
     }
@@ -38,7 +38,7 @@ class BypassTileService : TileService() {
             else -> Tile.STATE_INACTIVE
         }
         tile.subtitle = when {
-            s.error != null -> "No root"
+            s.error != null -> "Unavailable"
             s.enabled == true -> "On"
             else -> "Off"
         }
