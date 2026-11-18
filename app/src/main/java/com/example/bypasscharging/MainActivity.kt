@@ -1,28 +1,24 @@
 package com.example.bypasscharging
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.color.DynamicColors
-import com.google.android.material.color.DynamicColorsOptions
-import com.google.android.material.color.MaterialColors
-import com.google.android.material.materialswitch.MaterialSwitch
 import rikka.shizuku.Shizuku
 import kotlin.concurrent.thread
-import com.google.android.material.R as M3
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
-    private lateinit var card: MaterialCardView
+    private lateinit var card: LinearLayout
     private lateinit var icon: ImageView
     private lateinit var title: TextView
     private lateinit var subtitle: TextView
-    private lateinit var toggle: MaterialSwitch
+    private lateinit var toggle: Switch
     private var updatingUi = false
 
     private val shizukuResult = Shizuku.OnRequestPermissionResultListener { _, grant ->
@@ -30,12 +26,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        DynamicColors.applyToActivityIfAvailable(
-            this,
-            DynamicColorsOptions.Builder()
-                .setThemeOverlay(R.style.ThemeOverlay_BypassCharging_PureBlack)
-                .build()
-        ) // Material You colors + pure black in dark mode
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -46,28 +36,10 @@ class MainActivity : AppCompatActivity() {
         toggle = findViewById(R.id.bypassSwitch)
 
         toggle.setOnCheckedChangeListener { _, checked -> if (!updatingUi) apply(checked) }
-        findViewById<MaterialButton>(R.id.btnOn).setOnClickListener { apply(true) }
-        findViewById<MaterialButton>(R.id.btnOff).setOnClickListener { apply(false) }
-        findViewById<MaterialButton>(R.id.btnRefresh).setOnClickListener { refresh() }
-
-        // Root / Shizuku selector
-        val group = findViewById<MaterialButtonToggleGroup>(R.id.modeGroup)
-        group.check(
-            if (BypassController.getMode(this) == BypassController.Mode.SHIZUKU) R.id.btnModeShizuku
-            else R.id.btnModeRoot
-        )
-        group.addOnButtonCheckedListener { _, id, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            if (id == R.id.btnModeShizuku) {
-                BypassController.setMode(this, BypassController.Mode.SHIZUKU)
-                if (BypassController.shizukuRunning() && !BypassController.shizukuGranted()) {
-                    try { Shizuku.requestPermission(1001) } catch (_: Throwable) {}
-                }
-            } else {
-                BypassController.setMode(this, BypassController.Mode.ROOT)
-            }
-            refresh()
-        }
+        findViewById<TextView>(R.id.btnOn).setOnClickListener { apply(true) }
+        findViewById<TextView>(R.id.btnOff).setOnClickListener { apply(false) }
+        findViewById<TextView>(R.id.btnRefresh).setOnClickListener { refresh() }
+        findViewById<ImageView>(R.id.btnSettings).setOnClickListener { showMethodDialog() }
 
         try { Shizuku.addRequestPermissionResultListener(shizukuResult) } catch (_: Throwable) {}
     }
@@ -79,6 +51,30 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        refresh()
+    }
+
+    /** Cogwheel menu: choose how the app runs its commands. Root is the default. */
+    private fun showMethodDialog() {
+        val items = arrayOf("Root (default)", "Shizuku (no root)")
+        val current = if (BypassController.getMode(this) == BypassController.Mode.SHIZUKU) 1 else 0
+        AlertDialog.Builder(this)
+            .setTitle("Control method")
+            .setSingleChoiceItems(items, current) { dialog, which ->
+                chooseMode(if (which == 1) BypassController.Mode.SHIZUKU else BypassController.Mode.ROOT)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun chooseMode(mode: BypassController.Mode) {
+        BypassController.setMode(this, mode)
+        if (mode == BypassController.Mode.SHIZUKU &&
+            BypassController.shizukuRunning() && !BypassController.shizukuGranted()
+        ) {
+            try { Shizuku.requestPermission(1001) } catch (_: Throwable) {}
+        }
         refresh()
     }
 
@@ -94,17 +90,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun render(s: BypassController.Status) {
         val on = s.enabled == true
-        val (bg, fg) = when {
-            s.error != null -> M3.attr.colorErrorContainer to M3.attr.colorOnErrorContainer
-            on -> M3.attr.colorPrimaryContainer to M3.attr.colorOnPrimaryContainer
-            else -> M3.attr.colorSurfaceVariant to M3.attr.colorOnSurfaceVariant
+        val (bgRes, fgRes) = when {
+            s.error != null -> R.color.error_container to R.color.on_error_container
+            on -> R.color.primary_container to R.color.on_primary_container
+            else -> R.color.surface_variant to R.color.on_surface_variant
         }
-        val bgColor = MaterialColors.getColor(card, bg)
-        val fgColor = MaterialColors.getColor(card, fg)
-        card.setCardBackgroundColor(bgColor)
-        icon.setColorFilter(fgColor)
-        title.setTextColor(fgColor)
-        subtitle.setTextColor(fgColor)
+        val fg = getColor(fgRes)
+        (card.background.mutate() as GradientDrawable).setColor(getColor(bgRes))
+        icon.setColorFilter(fg)
+        title.setTextColor(fg)
+        subtitle.setTextColor(fg)
 
         when {
             s.error != null -> { title.text = "Error"; subtitle.text = s.error }
